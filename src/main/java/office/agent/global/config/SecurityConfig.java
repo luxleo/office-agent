@@ -2,6 +2,7 @@ package office.agent.global.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import office.agent.global.jwt.JwtValidationFilter;
 import office.agent.security.oauth2.CustomOAuth2MemberService;
 import office.agent.security.oauth2.CustomOAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.FormLoginC
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Arrays;
@@ -25,6 +27,7 @@ import java.util.Collections;
 public class SecurityConfig {
     private final CustomOAuth2MemberService oAuth2MemberService;
     private final CustomOAuth2SuccessHandler oAuth2SuccessHandler;
+    private final JwtValidationFilter jwtValidationFilter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -35,6 +38,7 @@ public class SecurityConfig {
                                 .userService(oAuth2MemberService))
                         .successHandler(oAuth2SuccessHandler)
                 )
+                .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(HttpBasicConfigurer::disable)
                 .formLogin(FormLoginConfigurer::disable)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
